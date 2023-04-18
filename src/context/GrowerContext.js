@@ -25,6 +25,7 @@ export const GrowerContext = createContext({
   updateFilter: () => {},
   getTotalGrowerCount: () => {},
   getGrowerSelfies: () => {},
+  getWallets: () => {},
 });
 
 export function GrowerProvider(props) {
@@ -69,11 +70,7 @@ export function GrowerProvider(props) {
     const pageNumber = currentPage;
 
     //set correct values for organization_id, an array of uuids for ALL_ORGANIZATIONS or a uuid string if provided
-    const finalFilter = setOrganizationFilter(
-      filter.getWhereObj(),
-      orgId,
-      orgList
-    );
+    const finalFilter = setOrganizationFilter(filter, orgId, orgList);
 
     log.debug('load growers');
 
@@ -88,6 +85,21 @@ export function GrowerProvider(props) {
     setCount(total);
     setGrowers(grower_accounts);
     setIsLoading(false);
+  };
+
+  const getWallets = async (name, pageNumber) => {
+    const { total, wallets } = await api.getWallets({
+      skip: pageNumber * pageSize,
+      rowsPerPage: pageSize,
+      filter: new FilterGrower({
+        wallet: name,
+      }),
+    });
+
+    return {
+      total,
+      wallets,
+    };
   };
 
   const getCount = async () => {
@@ -163,6 +175,7 @@ export function GrowerProvider(props) {
     updateFilter,
     getTotalGrowerCount,
     getGrowerSelfies,
+    getWallets,
   };
 
   return (
